@@ -3,6 +3,7 @@
 require_once 'lib/ActiveRecord.php';
 require_once 'lib/User.php';
 require_once 'lib/Tweet.php';
+require_once  'lib/Comment.php';
 
 // vom face setup
 $host = 'localhost';

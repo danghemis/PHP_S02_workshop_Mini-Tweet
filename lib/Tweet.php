@@ -15,6 +15,7 @@ class Tweet extends ActiveRecord
 
     private $date;
 
+    /** @var Comment $comments */
     private $comments = [];
 
     public function __construct($content = null, $id = null, $userId = null, $date = null)
@@ -88,7 +89,8 @@ class Tweet extends ActiveRecord
 
     public function getComments()
     {
-        // Comment::findAllByTweetId($this->getId())
+//         Comment::findAllByTweetId($this->getId());
+        Comment:: fetchByTweet($this);
 
         return $this->comments;
     }
