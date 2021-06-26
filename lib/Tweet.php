@@ -3,27 +3,16 @@
 class Tweet extends ActiveRecord
 {
     static $table = 'Tweets';
-
     private $id;
-
     private $content;
-
+    private $date;
     /** @var User $user */
     private $user = null;
-
     private $userId;
 
-    private $date;
-
-    /** @var Comment $comments */
-    private $comments = [];
-
-    public function __construct($content = null, $id = null, $userId = null, $date = null)
+    public function __construct($id = null)
     {
         $this->setId($id);
-        $this->setUserId($userId);
-        $this->setContent($content);
-        $this->setDate($date);
     }
 
     public function getId()
@@ -54,7 +43,6 @@ class Tweet extends ActiveRecord
             $user = User::findOneById($this->getUserId());
             $this->setUser($user);
         }
-
         return $this->user;
     }
 
@@ -87,25 +75,11 @@ class Tweet extends ActiveRecord
         return $this;
     }
 
-    public function getComments()
-    {
-//         Comment::findAllByTweetId($this->getId());
-        Comment:: fetchByTweet($this);
-
-        return $this->comments;
-    }
-
-    public function setComments($comments)
-    {
-        $this->comments = $comments;
-        return $this;
-    }
-
     public function save()
     {
         if ($this->getId() === null) {
             $sql = "
-                INSERT INTO ".self::$table."
+                INSERT INTO " . self::$table . "
                     (content, user_id, date)
                 VALUES
                     (:content, :user_id, :date);
@@ -139,9 +113,42 @@ class Tweet extends ActiveRecord
         $tweets = [];
 
         foreach ($tweetList as $tweetData) {
-            $tweets[] = new Tweet($tweetData['content'], $tweetData['id'], $tweetData['user_id'], $tweetData['date']);
+            $eachTweet = new Tweet($tweetData['id']);
+            $eachTweet->setUserId($tweetData['user_id'])->setContent($tweetData['content'])->setDate($tweetData['date']);
+            $tweets[] = $eachTweet;
         }
 
         return $tweets;
     }
+
+    public static function findOneById($id)
+    {
+        $sql = "SELECT * FROM " . self::$table . " WHERE id = :id;";
+        $deInlocuit = ['id' => $id];
+
+        $list = self::$conn->prepare($sql);
+
+        try {
+            $result = $list->execute($deInlocuit);
+        } catch (PDOException $e) {
+            die($e->getMessage());
+        }
+
+        if ($list->rowCount() > 1) {
+            die('nu se poate gasi un singur tweet');
+        } elseif ($list->rowCount() === 0) {
+            return null;
+        } else {
+            $row = $list->fetch(PDO::FETCH_ASSOC);
+
+            $returnableTweet = new Tweet($row['id']);
+            $returnableTweet
+                ->setContent($row['content'])
+                ->setDate($row['date'])
+                ->setUserId($row['user_id']);
+
+            return $returnableTweet;
+        }
+    }
+
 }

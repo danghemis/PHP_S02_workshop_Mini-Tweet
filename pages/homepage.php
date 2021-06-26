@@ -1,87 +1,106 @@
 <?php
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['content']) && $_POST['content'] !== '') {
-        $myTweet = new Tweet($_POST['content']);
-        $myTweet->setUser($loggedUser)
-                ->setDate(time());
-        $myTweet->save();
+    if ($_POST['submit'] == 'tweet') {
+        if (isset($_POST['content']) && $_POST['content'] !== '') {
+            $myTweet = new Tweet();
+            $myTweet->setContent($_POST['content'])->setDate(date('Y-m-d H:i:s', time()))->setUser($loggedUser);
+            $myTweet->save();
+        }
     }
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['text']) && $_POST['text'] !== '') {
-        $myComment = new Comment($_POST['text']);
-        $myComment->setUser($loggedUser)
-            ->setDate(time());
-        $myComment->save();
+    if ($_POST['submit'] == 'comment') {
+        //var_dump($_POST);
+        if (isset($_POST['text']) && $_POST['text'] !== '' && isset($_POST['tweet_id'])) {
+            $myComment = new Comment();
+            $myComment->setText($_POST['text'])->setUser($loggedUser)->setTweetId($_POST['tweet_id'])->setDate(date('Y-m-d H:i:s', time()));
+            $myComment->save();
+        }
     }
 }
 
 $tweetList = Tweet::findAll();
 
-$commentList = Comment::findAll();
 ?>
-<html>
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>My Twitter</title>
-    <style>
-        .tweetlist > .tweet {
-            display: block;
-            width: 100%;
-            margin-bottom: 15px;
-        }
-
-        .tweetlist > .tweet > .content {
-            font-size: 1.4em;
-        }
-
-        .tweetlist > .tweet > .user {
-            font-style: italic;
-            color: #888;
-        }
-        .commentList{
-            font-size: 1em;
-            color: darkred;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Home</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 </head>
 <body>
-<div>
-    <div class="page-header">
-        Salutare, <?php
-            echo $loggedUser->getName();
-        ?>!
-
-        <a href="index.php?page=logout">logout</a>
-    </div>
-    <form action="index.php" method="post">
-        <textarea name="content" id="" cols="30" rows="10"></textarea>
-        <button type="submit">Send tweet!</button>
-    </form>
-
-    <div class="tweetlist">
-        <?php foreach ($tweetList as $tweet) {  $tweet->getComments ();?>
-        <div class="tweet">
-            <div class="content"><?php echo $tweet->getContent()?></div>
-            <div class="user"><?php echo $tweet->getUser()->getName() . ' at ' . date('Y-m-d h:i:s', $tweet->getDate()); ?></div>
-<!--            <div><a href="index.php">adauga comentariu!</a>-->
-        </div>
-    </div>
-                <form action="index.php" method="post">
-                    <textarea name="text" id="" cols="30" rows="2"></textarea>
-                    <button type="submit">Add comment!</button>
-                </form>
-            <div class="commentList">
-
-            <div class="comment">
-                <?php foreach($commentList as $comment) { ?>
-                <div class="text"><?php echo $comment->getText()?></div>
-                <div class="user"><?php echo $comment->getUser()->getName() . ' at ' . date('Y-m-d h:i:s', $comment->getDate()); ?></div>
-
-             </div>
-        <?php } } ?>
+<div class="container">
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h3>Salutare, <?= $loggedUser->getName(); ?>!</h3>
             </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 10px; margin-bottom: 10px;">
+                <a class="btn btn-warning" href="index.php?page=logout" role="button">Logout</a>
+                <a class="btn btn-info" href="index.php?page=messages" role="button">Mesaje</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <form action="index.php?page=homepage" method="post" role="form">
+                    <legend>Tweet-ul tau</legend>
+                    <div class="form-group">
+                        <textarea required name="content" id="content" cols="30" rows="10" class="form-control" placeholder="tweet-ul tau..."></textarea>
+                    </div>
+                    <button type="submit" name="submit" value="tweet" class="btn btn-success">Posteaza tweet-ul!</button>
+                </form>
+            </div>
+        </div>
 
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 10px;">
+            <legend>All tweets</legend>
+            <?php
+            foreach ($tweetList as $tweet)
+            {
+                echo "
+                    <div class=\"tweet\">
+                        <h4 class=\"content\">" . $tweet->getContent() . "</h4>
+                        <h5 class=\"user\">" . $tweet->getUser()->getName() . " at " . $tweet->getDate() . "</h5>
+                    </div>
+                    <hr>
+                <div class=\"commentList\">
+                    <p>Comentarii:</p>
+                    <div class=\"comment\">
+                    ";
+                $commentList = Comment::findAllByTweet($tweet);
+                if ($commentList != null) {
+                    foreach($commentList as $comment)
+                    {
+                        echo "
+                            <div class=\"text\">" . $comment->getText() . "</div>
+                            <div class=\"user\">" . $comment->getUser()->getName() . " at " . $comment->getDate() . "</div>
+                        ";
+                    }
+                } else {
+                    echo "<p>Nu sunt comentarii. Fii primul care comenteaza la acest tweet!</p>";
+                }
+                echo "
+                    </div>
+                </div>
+                ";
+                echo "
+                    <form action=\"index.php?page=homepage\" method=\"post\">
+                        <input type=\"text\" name=\"tweet_id\" id=\"tweet_id\" value=\"" . $tweet->getId() . "\" style=\"display: none;\">
+                        <textarea name=\"text\" id=\"text\" cols=\"30\" rows=\"2\"></textarea>
+                        <button type=\"submit\" name=\"submit\" value=\"comment\">Add comment!</button>
+                    </form>
+                    <hr>
+                ";
+            }
+            ?>
+        </div>
     </div>
 </div>
 </body>

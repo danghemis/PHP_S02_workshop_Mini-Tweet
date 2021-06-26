@@ -3,13 +3,9 @@
 class User extends ActiveRecord
 {
     static $table = 'Users';
-
     private $id;
-
     private $name;
-
     private $email;
-
     private $password;
 
     public function __construct($id = null)
@@ -55,10 +51,9 @@ class User extends ActiveRecord
         return $this->password;
     }
 
-    public function setPassword($password)
+    public function setPassword($password) : User
     {
         $savablePassword = password_hash($password, PASSWORD_BCRYPT);
-
         $this->password = $savablePassword;
         return $this;
     }
@@ -76,7 +71,7 @@ class User extends ActiveRecord
     {
         if ($this->getId() === null) {
             $sql = "
-                INSERT INTO ".self::$table."
+                INSERT INTO " . self::$table . "
                     (name, email, password)
                 VALUES
                     (:name, :email, :password);
@@ -179,6 +174,26 @@ class User extends ActiveRecord
 
             return $returnableUser;
         }
+    }
+
+    public static function findAll()
+    {
+        $sql = 'SELECT * FROM ' . self::$table . ' ORDER BY name';
+        $userList = self::$conn->query($sql);
+        $users = [];
+
+        if ($userList->rowCount() > 1)
+            {
+                foreach ($userList as $userInfo) {
+                    $user = new User($userInfo['id']);
+                    $user->setName($userInfo['name'])->setEmail($userInfo['email'])->setPassword($userInfo['password']);
+                    $users[] = $user;
+                }
+                return $users;
+            } else {
+                return null;
+            }
+
     }
 
     public function delete()
