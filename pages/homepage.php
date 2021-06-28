@@ -35,71 +35,67 @@ $tweetList = Tweet::findAll();
 </head>
 <body>
 <div class="container">
-        <div class="row">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                <h3>Salutare, <?= $loggedUser->getName(); ?>!</h3>
-            </div>
+    <?php include_once 'pages/header.php'; ?>
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 10px; margin-bottom: 10px;">
+            <a class="btn btn-warning" href="index.php?page=logout" role="button">Logout</a>
+            <a class="btn btn-info" href="index.php?page=messages" role="button">Mesaje</a>
         </div>
-        <div class="row">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 10px; margin-bottom: 10px;">
-                <a class="btn btn-warning" href="index.php?page=logout" role="button">Logout</a>
-                <a class="btn btn-info" href="index.php?page=messages" role="button">Mesaje</a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                <form action="index.php?page=homepage" method="post" role="form">
-                    <legend>Tweet-ul tau</legend>
-                    <div class="form-group">
-                        <textarea required name="content" id="content" cols="30" rows="10" class="form-control" placeholder="tweet-ul tau..."></textarea>
-                    </div>
-                    <button type="submit" name="submit" value="tweet" class="btn btn-success">Posteaza tweet-ul!</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 10px;">
-            <legend>All tweets</legend>
-            <?php
-            foreach ($tweetList as $tweet)
-            {
-                echo "
-                    <div class=\"tweet\">
-                        <h4 class=\"content\">" . $tweet->getContent() . "</h4>
-                        <h5 class=\"user\">" . $tweet->getUser()->getName() . " at " . $tweet->getDate() . "</h5>
-                    </div>
-                    <hr>
-                <div class=\"commentList\">
-                    <p>Comentarii:</p>
-                    <div class=\"comment\">
-                    ";
-                $commentList = Comment::findAllByTweet($tweet);
-                if ($commentList != null) {
-                    foreach($commentList as $comment)
-                    {
-                        echo "
-                            <div class=\"text\">" . $comment->getText() . "</div>
-                            <div class=\"user\">" . $comment->getUser()->getName() . " at " . $comment->getDate() . "</div>
-                        ";
-                    }
-                } else {
-                    echo "<p>Nu sunt comentarii. Fii primul care comenteaza la acest tweet!</p>";
-                }
-                echo "
-                    </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <form action="index.php?page=homepage" method="post" role="form">
+                <legend>Tweet-ul tau</legend>
+                <div class="form-group">
+                    <textarea required name="content" id="content" cols="30" rows="10" class="form-control" placeholder="tweet-ul tau..."></textarea>
                 </div>
+                <button type="submit" name="submit" value="tweet" class="btn btn-success">Posteaza tweet-ul!</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 10px;">
+        <legend>All tweets</legend>
+        <?php
+        foreach ($tweetList as $tweet)
+        {
+            echo "
+                <div class=\"tweet\">
+                    <h4 class=\"content\">" . $tweet->getContent() . "</h4>
+                    <h5 class=\"user\">" . $tweet->getUser()->getName() . " at " . $tweet->getDate() . "</h5>
+                </div>
+                <hr>
+            <div class=\"commentList\">
+                <p>Comentarii:</p>
+                <div class=\"comment\">
                 ";
-                echo "
-                    <form action=\"index.php?page=homepage\" method=\"post\">
-                        <input type=\"text\" name=\"tweet_id\" id=\"tweet_id\" value=\"" . $tweet->getId() . "\" style=\"display: none;\">
-                        <textarea name=\"text\" id=\"text\" cols=\"30\" rows=\"2\"></textarea>
-                        <button type=\"submit\" name=\"submit\" value=\"comment\">Add comment!</button>
-                    </form>
-                    <hr>
-                ";
+            $commentList = Comment::findAllByTweet($tweet);
+            if ($commentList != null) {
+                foreach($commentList as $comment)
+                {
+                    echo "
+                        <div class=\"text\">" . $comment->getText() . "</div>
+                        <div class=\"user\">" . $comment->getUser()->getName() . " at " . $comment->getDate() . "</div>
+                    ";
+                }
+            } else {
+                echo "<p>Nu sunt comentarii. Fii primul care comenteaza la acest tweet!</p>";
             }
-            ?>
+            echo "
+                </div>
+            </div>
+            ";
+            echo "
+                <form action=\"index.php?page=homepage\" method=\"post\">
+                    <input type=\"text\" name=\"tweet_id\" id=\"tweet_id\" value=\"" . $tweet->getId() . "\" style=\"display: none;\">
+                    <textarea name=\"text\" id=\"text\" cols=\"30\" rows=\"2\"></textarea>
+                    <button type=\"submit\" name=\"submit\" value=\"comment\">Add comment!</button>
+                </form>
+                <hr>
+            ";
+        }
+        ?>
         </div>
     </div>
 </div>

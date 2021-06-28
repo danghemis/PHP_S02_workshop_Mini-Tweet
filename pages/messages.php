@@ -16,7 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sentMessages = Message::findAllBySender($user);
 
         //se trimite e-mail destinatarului
-        $headers = "From: ". $user->getEmail();
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+        $headers[] = "From: ". $user->getEmail();
         $to = $toUser->getEmail();
         $subject = "Aveti un nou mesaj pe Mini-Tweet";
         $mailText = $message->getText();
@@ -41,18 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="container">
-    <div class="row">
-        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-            <h1>Salut, <?= $user->getName(); ?>!</h1>
-        </div>
-    </div>
+    <?php include_once 'pages/header.php'; ?>
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-top:10px; margin-bottom:10px;">
             <a class="btn btn-warning" href="index.php?page=logout" role="button">Logout</a>
             <a class="btn btn-info" href="index.php?page=homepage" role="button">Home</a>
         </div>
     </div>
-
     <div class="row" id="message_compose">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <form action="" method="post" role="form">
@@ -78,7 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         </div>
     </div>
-
     <div class="row" id="received_messages">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="margin-bottom:10px;">
             <fieldset class="form-group">
@@ -99,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </fieldset>
         </div>
     </div>
-
     <div class="row" id="sent_messages">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <fieldset class="form-group">
@@ -120,8 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </fieldset>
         </div>
     </div>
-
 </div>
-
 </body>
 </html>
