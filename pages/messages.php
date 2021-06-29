@@ -17,15 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         //se trimite e-mail destinatarului
         $headers[] = 'MIME-Version: 1.0';
-        $headers[] = 'Content-type: text/html; charset=iso-8859-1';
-        $headers[] = "From: ". $user->getEmail();
+        $headers[] = 'Content-type: text/html; charset=utf-8';
+        $headers[] = 'To: ' . $toUser->getEmail();
+        $headers[] = 'From: ' . $user->getEmail();
         $to = $toUser->getEmail();
-        $subject = "Aveti un nou mesaj pe Mini-Tweet";
+        $subject = 'Aveti un nou mesaj pe Mini-Tweet';
         $mailText = $message->getText();
         $mailText = wordwrap($mailText, 70);
-
-        $mailResult = mail($to, $subject, $mailText, $headers);
-
+        $mailResult = mail($to, $subject, $mailText, implode("\r\n", $headers));
     }
 }
 
